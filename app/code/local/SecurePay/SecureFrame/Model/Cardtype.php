@@ -8,7 +8,8 @@ class SecurePay_SecureFrame_Model_Cardtype
         array('value'=>'AMEX', 'label'=>'American Express'),
         array('value'=>'MASTERCARD', 'label'=>'MasterCard'),
         array('value'=>'DINERS', 'label'=>'Diners'),
-        array('value'=>'JCB', 'label'=>'JCB')
+        array('value'=>'JCB', 'label'=>'JCB'),
+        array('value'=>'PAYPAL', 'label'=>'PayPal')
     );
     return $options;
   }

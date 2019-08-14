@@ -28,13 +28,13 @@
         <model>secureframe/standard</model>
         <active>0</active>
         <order_status>pending</order_status>
-        <title>Credit Card (powered by SecurePay)</title>
+        <title>Payment via SecureFrame</title>
         <payment_action>sale</payment_action>
         <test_mode>1</test_mode>
         <merchant_id></merchant_id>
         <transaction_password></transaction_password>
         <transaction_type></transaction_type>
-        <template>iframe</template>
+        <template></template>
         <stylesheet_url></stylesheet_url>
         <allowspecific>0</allowspecific>
         <accepted_card_types>VISA,MASTERCARD</accepted_card_types>

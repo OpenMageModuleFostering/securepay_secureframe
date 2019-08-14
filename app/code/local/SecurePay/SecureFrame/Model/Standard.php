@@ -25,6 +25,21 @@ class SecurePay_SecureFrame_Model_Standard extends Mage_Payment_Model_Method_Abs
     public function authorize(Varien_Object $payment, $amount)
     {
     }
+    
+    /**
+     * Check method for processing with base currency
+     *
+     * @param string $currencyCode
+     * @return boolean
+     */
+    public function canUseForCurrency($currencyCode)
+    {
+    	$currency_accepted = $this->getConfigData('currency_accepted');
+    	if ($currency_accepted == "M" || ($currency_accepted == "A" && $currencyCode == "AUD")) {
+    		return true;
+    	}
+    	return false;
+    }
 
     /**
      * Instantiate state and set it to state object

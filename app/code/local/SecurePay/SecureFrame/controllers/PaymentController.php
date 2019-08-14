@@ -5,7 +5,7 @@ class SecurePay_SecureFrame_PaymentController extends Mage_Core_Controller_Front
 	public function redirectAction() {
 		$model = Mage::getSingleton('secureframe/standard');
 		if($model->getConfigData('test_mode') == true){
-			$actionUrl = "https://payment.securepay.com.au/test/v2/invoice";
+			$actionUrl = "http://payment.securepay.com.au/test/v2/invoice";
 		}else{
 			$actionUrl = "https://payment.securepay.com.au/live/v2/invoice";
 		}
@@ -103,9 +103,22 @@ class SecurePay_SecureFrame_PaymentController extends Mage_Core_Controller_Front
 		$fingerprint = sha1($merchant_id . '|' . $txnpassword . '|' . $txn_type . '|' . $orderId . '|' . $amount . '|' . $time);
 		$card_types = str_replace(',', '|', $model->getConfigData('accepted_card_types'));
 		$currency_accepted = $model->getConfigData('currency_accepted');
-		$shipping = $order->getShippingDescription();
-		$billing_meta = "none";
-		$delivery_meta = "none";
+		
+		$shipping_meta = $order->getShippingDescription();
+		
+		$billing = $order->getBillingAddress();
+		if (!empty($billing)) {
+			$billing_country = $billing->getCountry();
+			$billing_meta = $this->getAddressMetaData($billing);
+		}
+		
+		$delivery = $order->getShippingAddress();
+		if (!empty($delivery)) {
+			$delivery_country = $delivery->getCountry();
+			$delivery_meta = $this->getAddressMetaData($delivery);
+		}
+		
+		$cart_name = "Magento SecureFrame";
 		
 		$sfRequest = array(
 			"merchant_id"       => $merchant_id,
@@ -115,7 +128,7 @@ class SecurePay_SecureFrame_PaymentController extends Mage_Core_Controller_Front
 			"txn_type"          => $txn_type,
 			"primary_ref"       => $orderId,
 			"amount"            => $amount,
-		  "currency"          => ($currency_accepted === 'M') ? $order->getBaseCurrency()->getCurrencyCode() : 'AUD',
+		  	"currency"          => ($currency_accepted === 'M') ? $order->getBaseCurrency()->getCurrencyCode() : 'AUD',
 			"template"          => $model->getConfigData('template'),
 			"confirmation"      => "no",
 			"return_url"        => Mage::getBaseUrl() . "secureframe/payment/response?",
@@ -123,35 +136,27 @@ class SecurePay_SecureFrame_PaymentController extends Mage_Core_Controller_Front
 			"return_url_target" => "parent",
 			"return_url_text"   => "Continue",
 			"cancel_url"        => Mage::getBaseUrl() . "secureframe/payment/cancel",
-		  "card_types"        => $card_types,
+		  	"card_types"        => $card_types,
 			"page_style_url"    => $model->getConfigData('stylesheet_url'),
-			"meta"				=> $this->getMetaData($order)
+			"billing_country"	=> $billing_country,
+			"delivery_country"	=> $delivery_country,
+			"email_address"		=> strval($order->getCustomerEmail()),
+			"meta"				=> "cart_name_eq_$cart_name|cart_post_method_eq_$shipping_meta|cart_billing_address_eq_$billing_meta|cart_delivery_address_eq_$delivery_meta"
 		);
 		return $sfRequest;
 	}
-	
-	public function getMetaData($order) { 
-		$shipping_meta = $order->getShippingDescription();
-        $billing_meta = "none";
-        $delivery_meta = "none";
-		
-        $billing = $order->getBillingAddress();
-        if (!empty($billing)) {
-        	$billing_meta = $billing->getFirstname() . " " . $billing->getLastname() . "," . $billing->getCompany() . "," .
-        			$billing->getStreet(1) . " " . $billing->getCity() . "," .
-        			$billing->getRegion() . " " .	$billing->getPostcode() . " " . $billing->getCountry();
-        }
-        
-        $shipping = $order->getShippingAddress();
-        if (!empty($shipping)) {
 
-        
-        	$delivery_meta = $shipping->getFirstname() . " " . $shipping->getLastname() . "," . $shipping->getCompany() . "," .
-        			$shipping->getStreet(1) . " " . $shipping->getCity() . "," .
-        			$shipping->getRegion() . " " .	$shipping->getPostcode() . " " . $shipping->getCountry();
-        }
-                
-        return "cart_post_method_eq_$shipping_meta|cart_billing_address_eq_$billing_meta|cart_delivery_address_eq_$delivery_meta";
-		
+	
+	public function getAddressMetaData($address_details) {
+		if (!empty($address_details)) {
+				
+			return $address_details->getFirstname() . " " . $address_details->getLastname() . ", " . $address_details->getCompany() . ", " .
+					$address_details->getStreet(1) . " " . $address_details->getCity() . ", " .
+					$address_details->getRegion() . " " .	$address_details->getPostcode() . " " . $address_details->getCountry();
+		} else {
+			return "no details available";
+		}
 	}
+	
+
 }

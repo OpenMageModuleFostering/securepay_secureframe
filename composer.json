@@ -1,7 +1,7 @@
 {
-    "name": "OpenMageModuleFostering\/SecurePay_SecureFrame",
+    "name": "openmage-module-fostering\/securepay_secureframe",
     "type": "magento-module",
-    "license": "OSL-v3.0",
+    "license": "OSL-3.0",
     "homepage": "",
     "description": "Allows acceptance of payments via SecurePay.com.au's SecureFrame interface.",
     "authors": [
